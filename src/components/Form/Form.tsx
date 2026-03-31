@@ -3,9 +3,26 @@ import toast from "react-hot-toast";
 
 import style from "./Form.module.css";
 
-export default function Form() {
+interface FormProps {
+  onSubmit: (searchQuery: string) => void;
+}
+
+export default function Form({ onSubmit }: FormProps) {
+
+  const handleSubmit = (formData: FormData) => {
+    const searchQuery = formData.get("search") as string
+    if (!searchQuery) {
+      toast.error("type something")
+      return
+    } 
+      onSubmit(searchQuery)
+    }
+    
+  
+
+
   return (
-    <form className={style.form}>
+    <form className={style.form} action={handleSubmit}>
       <input
         className={style.input}
         placeholder="What do you want to write?"

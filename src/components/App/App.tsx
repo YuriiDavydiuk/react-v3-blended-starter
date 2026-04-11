@@ -7,11 +7,18 @@ import css from "./App.module.css";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchPosts } from "../../services/postService";
-import { useDebounce, useDebouncedCallback } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
+import CreatePostForm from "../CreatePostForm/CreatePostForm";
+import EditPostForm from "../EditPostForm/EditPostForm";
+import { Post } from "../../types/post";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreatePost, setIsCreatePost] = useState(false);
+  const [isEditPost, setIsEditPost] = useState(false);
+  const [currentPost, setCurrentPost] = useState<Post | null>(null);
 
   const { data } = useQuery({
     queryKey: ["posts", searchQuery, currentPage],
@@ -37,10 +44,48 @@ export default function App() {
             onPageChange={setCurrentPage}
           />
         )}
-        <button className={css.button}>Create post</button>
+        <button
+          className={css.button}
+          onClick={() => {
+            setIsModalOpen(true);
+            setIsCreatePost(true);
+          }}
+        >
+          Create post
+        </button>
       </header>
-      {/*  <Modal></Modal> */}
-      {posts.length > 0 && <PostList posts={posts} />}
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          {isCreatePost && (
+            <CreatePostForm
+              onClose={() => {
+                setIsModalOpen(false);
+                setIsCreatePost(false);
+              }}
+            />
+          )}
+          {isEditPost && currentPost && (
+            <EditPostForm
+              post={currentPost}
+              onClose={() => {
+                setCurrentPost(null);
+                setIsEditPost(false);
+                setIsModalOpen(false);
+              }}
+            />
+          )}
+        </Modal>
+      )}
+      {posts.length > 0 && (
+        <PostList
+          posts={posts}
+          onEdit={(post) => {
+            setCurrentPost(post);
+            setIsEditPost(true);
+            setIsModalOpen(true);
+          }}
+        />
+      )}
     </div>
   );
 }
